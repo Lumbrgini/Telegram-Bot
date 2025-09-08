@@ -8,9 +8,10 @@ let todoList = JSON.parse(fs.readFileSync("todoList.json", "utf-8"));
 
 const bot = new Telegraf(BOT_TOKEN);
 const ADMIN_ID = "{your admin's id}";
+
 bot.start((ctx) => {
-    ctx.reply('Привет, амиго. Этот бот поможет тебе организовать твой день.');
-    ctx.reply('Список команд:\n"/show" - показать весь список;\n"/add {имя задания}" - добавить новое задание в список;\n"/delete {номер задания}" - удалить задание;\n"/done {номер задания}" - отметить задание как выполненое;\n"/undone {номер задания}" - убрать пометку "выполненное";');
+    ctx.reply('Hello, amigo. This bot will help you organize your day.');
+    ctx.reply('List of commands:\n"/show" - show the whole list;\n"/add {task name}" - add a new task to the list;\n"/delete {task number}" - delete a task;\n"/done {task number}" - mark a task as done;\n"/undone {task number}" - remove the "done" mark;');
 });
 
 bot.command('show',(ctx) => {
@@ -20,10 +21,10 @@ bot.command('show',(ctx) => {
         return row;
     });
     if(todoList.length === 0){
-        ctx.reply("Пока что никаких заданий не было добавлено. Используй команду '/add {название}', чтобы добавить задание!");
+        ctx.reply("No tasks have been added yet. Use the '/add {title}' command to add a task!");
         return;
     }
-    ctx.reply(`Список дел на сегодня:\n${showList.join('\n')}`);
+    ctx.reply(`Today's to-do list:\n${showList.join('\n')}`);
 });
 
 bot.command('add', (ctx) => {
@@ -32,11 +33,10 @@ bot.command('add', (ctx) => {
         const newTodo = { title: todoTitle, isDone: false};
         todoList.push(newTodo);
         fs.writeFileSync('todoList.json', JSON.stringify(todoList, null, 2), 'utf-8'); 
-        ctx.reply(`Задание '${todoTitle}' было успешно добавлено!`);
+        ctx.reply(`Task '${todoTitle}' was successfully added!`);
     } catch {
-        ctx.reply("Что-то пошло не так. Пожалуйста, проверь правильность написания и попробуй снова!");
+        ctx.reply("Something went wrong. Please check your input and try again!");
     }
-    
 });
 
 bot.command('delete', (ctx) => {
@@ -44,9 +44,9 @@ bot.command('delete', (ctx) => {
         const todoIndex = Number(ctx.message.text.split(' ')[1]);
         const [deletedTodo] = todoList.splice(todoIndex - 1, 1);
         fs.writeFileSync('todoList.json', JSON.stringify(todoList, null, 2), 'utf-8'); 
-        ctx.reply(`Задание '${deletedTodo.title}' было успешно удалено.`);
+        ctx.reply(`Task '${deletedTodo.title}' was successfully deleted.`);
     } catch{
-        ctx.reply("Мне кажется ты пытаешься удалить задание, номер которого является ошибочным. Пожалуйста, проверь правильность написания и попробуй снова!");
+        ctx.reply("It seems you are trying to delete a task with an invalid number. Please check your input and try again!");
     }
 });
 
@@ -56,12 +56,12 @@ bot.command('done', (ctx) => {
         if(!todoList[todoIndex-1].isDone){
             todoList[todoIndex-1].isDone = true;
             fs.writeFileSync('todoList.json', JSON.stringify(todoList, null, 2), 'utf-8'); 
-            ctx.reply(`Ты отметил, что выполнил следующее задание: '${todoList[todoIndex-1].title}'. Молодцом, так держать!`);
+            ctx.reply(`You marked the following task as completed: '${todoList[todoIndex-1].title}'. Great job, keep it up!`);
         } else {
-            ctx.reply(`Ты уже успел отметить, что выполнил следующее задание: '${todoList[todoIndex-1].title}'. Не расслабляйся!`)
+            ctx.reply(`You have already marked the following task as completed: '${todoList[todoIndex-1].title}'. Stay focused!`)
         };
     } catch{
-        ctx.reply("Мне кажется ты пытаешься отметить выполненным задание, номер которого является ошибочным. Пожалуйста, проверь правильность написания и попробуй снова!")
+        ctx.reply("It seems you are trying to mark as done a task with an invalid number. Please check your input and try again!")
     }
 });
 
@@ -70,13 +70,12 @@ bot.command('undone', (ctx) => {
     if(todoList[todoIndex-1].isDone){
         todoList[todoIndex-1].isDone = false;
         fs.writeFileSync('todoList.json', JSON.stringify(todoList, null, 2), 'utf-8'); 
-        ctx.reply(`Отметка "выполненно" убрана со следующего задания: '${todoList[todoIndex-1].title}'.`);
+        ctx.reply(`The "done" mark was removed from the following task: '${todoList[todoIndex-1].title}'.`);
     } else {
-        ctx.reply(`Следующее задание ещё не выполненно: '${todoList[todoIndex-1].title}'. Не расслабляйся!`)
+        ctx.reply(`The following task is not yet completed: '${todoList[todoIndex-1].title}'. Stay on track!`)
     };
-
-    
 });
+
 bot.launch();
 
 // Enable graceful stop
